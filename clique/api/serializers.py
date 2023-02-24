@@ -60,7 +60,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 #Video Upload Serializer
 class VideoSerializer(serializers.ModelSerializer):
-    file = serializers.FileField(use_url=False)
 
     class Meta:
         model = Video

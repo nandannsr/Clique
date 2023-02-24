@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qj1r6+b&3k4d)gc5huyu=r9-jq_n1w3w3p+%j)ge(q_(q+w(!i'
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -226,12 +226,25 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024 * 1024
 TIMEOUT_SECONDS = 300
 TIMEOUT = TIMEOUT_SECONDS
 
-# Celery settings
-CELERY_BROKER_URL = 'redis://localhost:6379'  # or 'amqp://localhost'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'  # or 'db+sqlite:///results.sqlite3'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
 
-CELERY_IMPORTS = ('api.tasks', )
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+AWS_S3_ACCESS_KEY_ID = config("AWS_S3_ACCESS_KEY_ID")
+AWS_S3_SECRET_ACCESS_KEY = config("AWS_S3_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = 'cliquecontent'
+AWS_QUERYSTRING_AUTH = False
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    }
+}

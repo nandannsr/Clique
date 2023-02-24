@@ -30,6 +30,7 @@ const VideoUpload = () => {
       formData.append('title', title);
       formData.append('description', description);
       formData.append('file', chunk, video.name);
+      formData.append('file_name', video.name);
       formData.append('chunk', currentChunk);
       formData.append('total_chunks', chunks);
 
