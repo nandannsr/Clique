@@ -19,6 +19,7 @@ from django.core.files.storage import default_storage
 import boto3
 from botocore.exceptions import ClientError
 import logging
+from content.tasks import upload_file
 
 
 # Login Class with JWT
@@ -94,15 +95,10 @@ class VideoUploadView(CreateAPIView):
             s3_key = f'media/videos/{file_name}'
             print(final_file_path)
             print(s3_key)
-            s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_S3_ACCESS_KEY_ID,
-                             aws_secret_access_key=settings.AWS_S3_SECRET_ACCESS_KEY)
-            try:
-                 response = s3_client.upload_file(final_file_path, settings.AWS_STORAGE_BUCKET_NAME, s3_key)
-            except ClientError as e:
-                 logging.error(e)
+            upload_file.delay(file_name=final_file_path, bucket=settings.AWS_STORAGE_BUCKET_NAME, object_name=s3_key)
 
     # Get the public URL of the file on S3
-            s3_file_url = f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{file_name}'
+            s3_file_url = f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{s3_key}'
             print("1")
 
 

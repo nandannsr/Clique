@@ -9,8 +9,10 @@ import {
   Register,
   Welcome,
   UploadPage,
+  UserVideo,
 } from './pages/user/index'
 import PrivateRoutes from "./routes/PrivateRoutes";
+
 
 
 
@@ -31,6 +33,8 @@ function App() {
         <Route path="/login" element={<Login />}></Route>
         <Route path="/register" element={<Register />}></Route>
         <Route path="/upload" element={<UploadPage />}></Route>
+        <Route path="/playing" element={<UserVideo />}></Route>
+        
 
         
 

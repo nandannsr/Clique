@@ -67,6 +67,10 @@ const VideoUpload = () => {
       alert('Please fill all fields');
       return;
     }
+    if (video.size > 250 * 1024 * 1024) {
+      alert("Maximum file size is 250 MB");
+      return;
+    }
 
     handleUpload();
   };
