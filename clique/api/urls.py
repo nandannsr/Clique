@@ -11,4 +11,5 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
      
     path('upload/',VideoUploadView.as_view(), name='upload'), # For video uploading
+    path('videos/',VideoList.as_view(), name='video_list'), #For sending video list to the front end
 ]

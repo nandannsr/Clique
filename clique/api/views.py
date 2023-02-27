@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
 from content.models import Video
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 import os
 from django.core.files.storage import default_storage
 import boto3
@@ -115,3 +115,7 @@ class VideoUploadView(CreateAPIView):
             return Response(status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_200_OK)
+    
+class VideoList(ListAPIView):
+    queryset = Video.objects.all()
+    serializer_class = VideoSerializer

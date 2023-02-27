@@ -1,10 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import Header from '../Header';
 import SideNavBar from '../SideNavBar';
+import instance from '../../utils/axiosInstance';
 
 const Home = () => {
-  
+
+  const [list, setList] = useState([]);
+  useEffect(() => {
+    instance.get('/api/videos')
+    .then(response => {
+      setList(response.data);
+    })
+    .catch(error => {
+      console.log(error);
+    })
+  }, []);
+  console.log(list)
   const videos = [
     {
       id: 1,
@@ -25,31 +37,31 @@ const Home = () => {
       thumbnailUrl: 'https://via.placeholder.com/300x200',
     },
     {
-      id: 3,
+      id: 4,
       title: 'Video Title 3',
       description: 'This is the description for Video 3.',
       thumbnailUrl: 'https://via.placeholder.com/300x200',
     },
     {
-      id: 3,
+      id: 5,
       title: 'Video Title 3',
       description: 'This is the description for Video 3.',
       thumbnailUrl: 'https://via.placeholder.com/300x200',
     },
     {
-      id: 3,
+      id: 6,
       title: 'Video Title 3',
       description: 'This is the description for Video 3.',
       thumbnailUrl: 'https://via.placeholder.com/300x200',
     },
     {
-      id: 3,
+      id: 7,
       title: 'Video Title 3',
       description: 'This is the description for Video 3.',
       thumbnailUrl: 'https://via.placeholder.com/300x200',
     },
     {
-      id: 3,
+      id: 8,
       title: 'Video Title 3',
       description: 'This is the description for Video 3.',
       thumbnailUrl: 'https://via.placeholder.com/300x200',
@@ -57,7 +69,6 @@ const Home = () => {
     
   ];
   const user = useSelector(state => state.user);
-  console.log(user)
   return (
     <div className="flex flex-col h-screen">
       <Header />
