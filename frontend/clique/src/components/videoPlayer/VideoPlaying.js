@@ -3,10 +3,13 @@ import VideoJS from './VideoJS';
 import videojs from 'video.js';
 import Header from '../Header';
 import SideNavBar from '../SideNavBar';
+import { useParams } from 'react-router-dom';
 
 const VideoPlaying = () => {
 
-    const playerRef = React.useRef(null);
+  const playerRef = React.useRef(null);
+  const { videoUrl } = useParams();
+  console.log(videoUrl)
 
   const videoJsOptions = {
     autoplay: true,
@@ -16,7 +19,7 @@ const VideoPlaying = () => {
     width: 640,
     height: 360,
     sources: [{
-      src: 'https://cliquecontent.s3.amazonaws.com/media/videos/hello.mp4',
+      src: videoUrl,
       type: 'video/mp4'
     }],
   };

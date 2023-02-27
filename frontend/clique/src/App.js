@@ -33,7 +33,7 @@ function App() {
         <Route path="/login" element={<Login />}></Route>
         <Route path="/register" element={<Register />}></Route>
         <Route path="/upload" element={<UploadPage />}></Route>
-        <Route path="/playing" element={<UserVideo />}></Route>
+        <Route path="/playing/:videoUrl" element={<UserVideo />}></Route>
         
 
         

@@ -3,18 +3,21 @@ import { useSelector } from 'react-redux';
 import Header from '../Header';
 import SideNavBar from '../SideNavBar';
 import instance from '../../utils/axiosInstance';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
 
   const [videos, setVideos] = useState([]);
   useEffect(() => {
-    instance.get('/api/videos')
-    .then(response => {
-      setVideos(response.data);
-    })
-    .catch(error => {
-      console.log(error);
-    })
+    const fetchData = async () => {
+      try {
+        const response = await instance.get('/api/videos');
+        setVideos(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchData();
   }, []);
   console.log(videos)
   const user = useSelector(state => state.user);
@@ -40,7 +43,7 @@ const Home = () => {
                 <h3 className="text-xl font-medium text-gray-800 mb-2">
                   {video.title}
                 </h3>
-                <p className="text-gray-600">{video.description}</p>
+                <Link to={`/playing/${encodeURIComponent(video.file)}`}><p className="text-gray-600">{video.description}</p> </Link>
               </div>
             </div>
           ))}
