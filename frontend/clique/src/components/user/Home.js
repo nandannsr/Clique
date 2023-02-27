@@ -6,68 +6,17 @@ import instance from '../../utils/axiosInstance';
 
 const Home = () => {
 
-  const [list, setList] = useState([]);
+  const [videos, setVideos] = useState([]);
   useEffect(() => {
     instance.get('/api/videos')
     .then(response => {
-      setList(response.data);
+      setVideos(response.data);
     })
     .catch(error => {
       console.log(error);
     })
   }, []);
-  console.log(list)
-  const videos = [
-    {
-      id: 1,
-      title: 'Video Title 1',
-      description: 'This is the description for Video 1.',
-      thumbnailUrl: 'https://via.placeholder.com/300x200',
-    },
-    {
-      id: 2,
-      title: 'Video Title 2',
-      description: 'This is the description for Video 2.',
-      thumbnailUrl: 'https://via.placeholder.com/300x200',
-    },
-    {
-      id: 3,
-      title: 'Video Title 3',
-      description: 'This is the description for Video 3.',
-      thumbnailUrl: 'https://via.placeholder.com/300x200',
-    },
-    {
-      id: 4,
-      title: 'Video Title 3',
-      description: 'This is the description for Video 3.',
-      thumbnailUrl: 'https://via.placeholder.com/300x200',
-    },
-    {
-      id: 5,
-      title: 'Video Title 3',
-      description: 'This is the description for Video 3.',
-      thumbnailUrl: 'https://via.placeholder.com/300x200',
-    },
-    {
-      id: 6,
-      title: 'Video Title 3',
-      description: 'This is the description for Video 3.',
-      thumbnailUrl: 'https://via.placeholder.com/300x200',
-    },
-    {
-      id: 7,
-      title: 'Video Title 3',
-      description: 'This is the description for Video 3.',
-      thumbnailUrl: 'https://via.placeholder.com/300x200',
-    },
-    {
-      id: 8,
-      title: 'Video Title 3',
-      description: 'This is the description for Video 3.',
-      thumbnailUrl: 'https://via.placeholder.com/300x200',
-    },
-    
-  ];
+  console.log(videos)
   const user = useSelector(state => state.user);
   return (
     <div className="flex flex-col h-screen">
@@ -83,7 +32,7 @@ const Home = () => {
               className="bg-white rounded-lg overflow-hidden shadow-lg"
             >
               <img
-                src={video.thumbnailUrl}
+                src="https://via.placeholder.com/300x200"
                 alt={video.title}
                 className="w-full h-48 object-cover"
               />
