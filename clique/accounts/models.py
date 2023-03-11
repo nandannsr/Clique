@@ -1,17 +1,17 @@
 
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 # Create your models here.
 
 class MyAccountManager(BaseUserManager):
-    def create_user(self,first_name,last_name,username,email,phone_number,password=None):
+    def create_user(self,first_name,last_name,username,email,phone_number=None,password=None):
         if not email:
             raise ValueError('Email needed')
         
         if not username:
             raise ValueError('Username needed')
-        if not phone_number:
-            raise ValueError('Phone number required')
+        
         
         user = self.model(
         email = self.normalize_email(email),
@@ -77,5 +77,10 @@ class Account(AbstractBaseUser):
          
      def has_module_perms(self, add_label):
          return True
+     
+class UserProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    profile_picture = models.ImageField(default='static/images/clip-02.jpg', upload_to='userprofile')
+
      
      

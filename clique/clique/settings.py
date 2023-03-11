@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'social_django',
     'drf_social_oauth2',
     'content',
+    'django_filters',
+    'rest_framework.authtoken',
     
 ]
 
@@ -124,14 +126,29 @@ REST_FRAMEWORK = {
     'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     'drf_social_oauth2.authentication.SocialAuthentication',
     
+    
     ),
     
     'DEFAULT_PERMISSION_CLASSES': [
       
      'rest_framework.permissions.AllowAny',
-]
+
+     ],
+
+     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+   
 
 }
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
 
 
 AUTHENTICATION_BACKENDS = (

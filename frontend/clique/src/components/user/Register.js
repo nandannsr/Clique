@@ -71,6 +71,7 @@ const Register = () => {
                   id="firstName"
                   placeholder="First Name"
                   className="block w-full border rounded-full p-2 "
+                  onBlur={formik.handleBlur}
                 />
                 {formik.errors.firstName && formik.touched.firstName && <p className="text-sm text-pink-600">{ formik.errors.firstName }</p>}
               </div>

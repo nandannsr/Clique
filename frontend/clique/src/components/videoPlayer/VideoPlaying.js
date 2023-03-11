@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
 const VideoPlaying = () => {
 
   const playerRef = React.useRef(null);
-  const { videoUrl } = useParams();
+  let { videoUrl } = useParams();
   console.log(videoUrl)
 
   const videoJsOptions = {
@@ -16,7 +16,7 @@ const VideoPlaying = () => {
     controls: true,
     responsive: true,
     fluid: false,
-    width: 640,
+    width: 720,
     height: 360,
     sources: [{
       src: videoUrl,
@@ -38,12 +38,12 @@ const VideoPlaying = () => {
   };
   return (
     <>
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-gray-800">
       <Header />
 
-    <div className="flex flex-1">
+    <div className="flex">
       <SideNavBar />
-      <main className="flex flex-col bg-gray-900 items-center justify-center p-20 w-5/6">
+      <main className="flex bg-gray-900 p-20 m-6 rounded-[50px] shadow-[0_35px_60px_-15px_rgba(0,0,0,1)]">
 
         <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
           

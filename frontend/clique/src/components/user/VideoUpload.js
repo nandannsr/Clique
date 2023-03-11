@@ -1,65 +1,121 @@
-import React, { useState } from 'react';
+import { useState, useRef, useEffect } from "react";
+import { storage } from "../../utils/firebase.js"
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import axios from 'axios';
 import instance from '../../utils/axiosInstance';
+import fetchGenres from "../../utils/genresList.js";
 
-const VideoUpload = () => {
+
+const VideoUpload = () => {  
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [video, setVideo] = useState(null);
+  const [imgUrl, setImgUrl] = useState(null);
+  const [progresspercent, setProgresspercent] = useState(0);
+  const [task, setTask] = useState(false)
+  const navigate = useNavigate()
+  const [genres, setGenres] = useState([]);
+  const [selectedGenres, setSelectedGenres] = useState([]);
+
+  const handleGenreChange = (event) => {
+    const selectedGenreId = parseInt(event.target.value);
+    if (event.target.checked) {
+      setSelectedGenres([...selectedGenres, selectedGenreId]);
+    } else {
+      setSelectedGenres(selectedGenres.filter((id) => id !== selectedGenreId));
+    }
+  };
+
+  useEffect(() => {
+    const getGenres = async () => {
+      const data = await fetchGenres();
+      setGenres(data);
+    };
+    getGenres();
+  }, []);
+
+  const uploadTaskRef = useRef(null);
   const user = useSelector(state => state.user);
 
-  const handleUpload = async () => {
-    const chunkSize = 1024 * 1024; // 1 MB
-    const fileSize = video.size;
-    const chunks = Math.ceil(fileSize / chunkSize);
+  const handleUpload = async (video) => {
+    if (!video) return;
 
+    const storageRef = ref(storage, `files/${video.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, video);
     const url = '/api/upload/';
     const token = localStorage.getItem('access_token');
     const headers = {
-      'Authorization': `Bearer ${token}`,
+    'Authorization': `Bearer ${token}`,
     };
 
-    for (let i = 0; i < chunks; i++) {
-      const start = i * chunkSize;
-      const end = (i + 1) * chunkSize;
-      const chunk = video.slice(start, end);
-      const currentChunk = i + 1;
-
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('description', description);
-      formData.append('file', chunk, video.name);
-      formData.append('file_name', video.name);
-      formData.append('chunk', currentChunk);
-      formData.append('total_chunks', chunks);
-
-      const config = {
-        headers: {
-          ...headers,
-          'Content-Type': 'multipart/form-data',
-          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((start + progressEvent.loaded) * 100 / fileSize);
-          console.log(`Chunk ${currentChunk} - ${percentCompleted}% uploaded`);
-        },
-      };
-
-      try {
-        await instance.post(url, formData, config);
-        console.log(`Chunk ${currentChunk} uploaded successfully`);
-      } catch (error) {
-        console.error(`Error uploading chunk ${currentChunk}`);
-        console.error(error);
+    uploadTask.on("state_changed",
+      (snapshot) => {
+        const progress =
+          Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        setProgresspercent(progress);
+      },
+      (error) => {
+        alert(error);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setImgUrl(downloadURL)
+          if(downloadURL){
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            const genreArray = [];
+            selectedGenres.forEach((genreId) => {
+              formData.append('genres', genreId)
+            });
+            formData.append('file', downloadURL);
+            try {
+                instance.post('/api/upload/',formData, headers)
+            } catch (error) {
+              console.error(error);
+            }
+             alert('Video uploaded successfully');
+             setTitle('');
+             setDescription('');
+             setVideo(null);
+             setSelectedGenres([]);
+          }
+        });
       }
-    }
+    );
 
-    alert('Video uploaded successfully');
-    setTitle('');
-    setDescription('');
-    setVideo(null);
-  };
+    uploadTaskRef.current = uploadTask;
+    setTask(true)
+  }
+
+  const handleCancel = () => {
+    if (uploadTaskRef.current) {
+      uploadTaskRef.current.cancel();
+      uploadTaskRef.current = null;
+      setProgresspercent(0);
+      setImgUrl(null);
+      setTask(false)
+      console.log("cancelled")
+    }
+  }
+
+  const handlePauseResume = () => {
+    if (!uploadTaskRef.current) return;
+
+    const isPaused = task;
+    if (!isPaused) {
+      uploadTaskRef.current.resume();
+      setTask(true)
+      console.log("r")
+    } else {
+      uploadTaskRef.current.pause();
+      console.log("p")
+      setTask(false)
+      console.log(isPaused)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,7 +128,7 @@ const VideoUpload = () => {
       return;
     }
 
-    handleUpload();
+    handleUpload(video);
   };
 
   return (
@@ -116,13 +172,50 @@ const VideoUpload = () => {
             onChange={(e) => setVideo(e.target.files[0])}
           />
         </div>
+         <div className="flex flex-col mb-4">
+          <label className="text-white font-bold mb-2">Genres</label>
+          {genres.map((genre) => (
+          <div key={genre.id}>
+          <input
+            type="checkbox"
+            id={genre.genre_name}
+            name="genres"
+            value={genre.id}
+            checked={selectedGenres.includes(genre.id)}
+            onChange={handleGenreChange}
+          />
+          <label className="text-white" htmlFor={genre.genre_name}>{genre.genre_name}</label>
+        </div>
+      ))}
+        </div>
         <button
           className="bg-pink-600 text-white py-2 px-4 rounded-md shadow-lg hover:bg-pink-700 mt-4"
           onClick={handleSubmit}
         >
           Upload
         </button>
+        {!imgUrl && (
+        <div className="w-1/2 mt-4">
+          <div className="bg-gray-200 rounded-full">
+            <div className="bg-blue-500 rounded-full h-2" style={{ width: `${progresspercent}%` }}></div>
+          </div>
+          <div className="text-right text-xs mt-1">
+            {progresspercent}%
+          </div>
+        </div>
+      )}
+      {uploadTaskRef.current && (
+        <div className="mt-8">
+          <button onClick={handleCancel} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-4">
+            Cancel
+          </button>
+          <button onClick={handlePauseResume} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+            {task ? "Pause" : "Resume"}
+          </button>
+        </div>
+      )}
       </form>
+      
     </div>
   );
 };

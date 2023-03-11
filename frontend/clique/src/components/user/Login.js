@@ -4,8 +4,25 @@ import { loginUser} from '../../redux/authSlice'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useGoogleLogin } from '@react-oauth/google';
 import instance from '../../utils/axiosInstance';
+import axios from 'axios';
 
 const Login = () => {
+
+  const sociallogin = useGoogleLogin({
+    onSuccess: async tokenResponse => {
+      try {
+        console.log(tokenResponse)
+      // const data = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+      //   headers: {
+      //     "Authorization": `Bearer ${tokenResponse.access_token}`
+      //   }
+      // })
+      // console.log(data)
+    }catch(err){
+       console.log(err)
+    }
+    }
+    });
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { error } = useSelector((state) => state.user)
@@ -87,7 +104,9 @@ const Login = () => {
       {error !== null ? <div className="text-red-600 text-center mt-4">
            {error}
         </div> : null}
-      
+        <button onClick={() => sociallogin()}>
+               Sign in with Google 🚀{' '}
+          </button>
     </div>
   </div>
   )

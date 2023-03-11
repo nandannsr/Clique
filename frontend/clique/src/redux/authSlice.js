@@ -2,28 +2,34 @@ import { createSlice } from '@reduxjs/toolkit';
 import instance from '../utils/axiosInstance';
 import jwt_decode from 'jwt-decode';
 
-let initialState = {
-    user: "",
-    token: "",
-    loading: false,
-    isAuthenticated: false,
-    error: null,
-}
 
 const authSlice = createSlice({
     name: "user",
-    initialState: () => ({...initialState}),
+    initialState: [],
     reducers: {
         login: (state, action) => {
-            state.token = action.payload.access;
-            state.user = action.payload.user;
-            state.loading = action.payload.loading;
-            state.isAuthenticated = action.payload.isAuthenticated;
+            const user={
+               id:action.payload.id,
+               username:action.payload.username,
+               firstname:action.payload.first_name,
+               lastname:action.payload.last_name,
+               email:action.payload.email,
+               phonenumber:action.payload.phone_number,
+               isLoggedIn: true,
+            
+              }
+              const token = {
+                access:action.payload.access,
+                refresh:action.payload.refresh
+              }
+              console.log(user)
             try {
                 localStorage.setItem("access_token", action.payload.access);
                 localStorage.setItem("refresh_token", action.payload.refresh);
-                localStorage.setItem("email", action.payload.user);
-                localStorage.setItem("isAuthenticated", action.payload.isAuthenticated);
+                localStorage.setItem("email", action.payload.email)
+                return {
+                  ...state,user,token,
+                }
             } catch (error) {
                 console.error(error);
             }
@@ -32,40 +38,42 @@ const authSlice = createSlice({
             state.error = action.payload.message
         },
 
+        setUserDetails: (state, action) => {
+          state.user = {
+                ...state.user,
+                firstname: action.payload.first_name,
+                lastname: action.payload.last_name,
+          }
+        },
+
 
     }
 });
 
 
 
-export const { login,setError } = authSlice.actions;
+export const { login,setError, setUserDetails } = authSlice.actions;
 
 export const loginUser = (email, password) => async (dispatch) => {
-    dispatch(login({ loading: true }));
     try {
       const res = await instance.post('api/login/', {
         email: email,
         password: password,
       });
-      const access = res.data.access;
+      if (res.status===200) {
+      const access = res.data.access
       dispatch(
-        login({
-          access,
-          refresh: res.data.refresh,
-          user: jwt_decode(access).email,
-          loading: false,
-          isAuthenticated: true,
-        })
+        login(res.data)
       );
       return access;
+     }
+     
     } catch (err) {
       console.error(err);
       console.log(err.response.data);
       if (err.response.status === 401) {
         dispatch(setError({ message: 'invalid credentials' }));
       }
-      dispatch(login({ loading: false }));
-      return null;
     }
   };
 

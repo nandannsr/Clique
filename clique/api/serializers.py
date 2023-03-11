@@ -2,21 +2,42 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
+from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.models import Account
-from content.models import Video
+from content.models import Video, Genre
 from rest_framework.exceptions import ParseError
 
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Account
+        fields = ['first_name', 'last_name', 'email',]
+
+
+class UserSerializerWithToken(UserSerializer):
+    token = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Account
+
+        fields = ['id', 'username', 'first_name', 'last_name','phone_number',
+                  'email', 'token',]
+
+    def get_token(self, obj):
+        token = RefreshToken.for_user(obj)
+        return str(token.access_token)
+    
 class LoginSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
+   
+   def validate(self, attrs):
+        data = super().validate(attrs)
+        serializer = UserSerializerWithToken(self.user).data
+        for k, v in serializer.items():
+            data[k] = v
 
-        # Add custom claims
-        token['email'] = user.email
-        token['username'] = user.username
-        # ...
-
-        return token
+        return data
 
 # Serializer for Registration
 class RegisterSerializer(serializers.ModelSerializer):
@@ -63,5 +84,23 @@ class VideoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Video
-        fields = ['id', 'title', 'description', 'file']
+        fields = ['id', 'title', 'description', 'file', 'genres']
+
+    def create(self, validated_data):
+        genres = validated_data.pop('genres', [])
+        print(genres)
+        instance = super().create(validated_data)
+        for g in genres:
+            try:
+                genre = Genre.objects.get(genre_name=g)
+            except Genre.DoesNotExist:
+                raise serializers.ValidationError(f'Genre "{g}" does not exist')
+            instance.genres.add(genre)
+        return instance
     
+#Genre Serializer
+class GenreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Genre
+        fields = ['id', 'genre_name']
